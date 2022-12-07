@@ -1,0 +1,53 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title> Hotel App </ion-title>
+    <ion-button
+      class="cerrarSesion"
+      (click)="cerrarSesion()"
+      slot="end"
+      color="danger"
+    >
+      <ion-icon name="exit"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-row>
+    <ion-col>
+      <ion-list>
+        <ion-item-sliding *ngFor="let huesped of huespedes; let i=index">
+          <ion-item>
+            <ion-label>{{huesped.nombre}} </ion-label>
+            <ion-label>{{huesped.habitacion}} </ion-label>
+            <ion-label>{{huesped.fecha_ingreso}} </ion-label>
+            <ion-label>{{huesped.fecha_salida}} </ion-label>
+            <ion-button color="success" href="{{'https://wa.me/' + countrycode+huesped.telefono + '?text=Gracias por reservar, aquí tiene su código de acceso: '+ huesped.token}}" target="_blank" slot="end" class="margin">
+              <ion-icon name="logo-whatsapp"></ion-icon>
+              &nbsp; Enviar token 
+            </ion-button>
+            <ion-button
+              (click)="verHuesped(huesped.token)"
+              slot="end"
+              size="default"
+              color="primary"
+            >
+              <ion-icon name="search"></ion-icon>
+            </ion-button>
+          </ion-item>
+          <ion-item-options side="end" (ionSwipe)="borrarHuesped(i)">
+            <ion-item-option expandable color="danger">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+    </ion-col>
+  </ion-row>
+  <ion-fab class="fab" horizontal="end">
+    <ion-title>Nuevo Huésped</ion-title>
+    <ion-fab-button color="primary" (click)="nuevoHuesped()">
+      <ion-icon name="create"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
