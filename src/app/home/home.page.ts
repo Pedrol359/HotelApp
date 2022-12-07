@@ -18,7 +18,12 @@ export class HomePage {
     private alertController: AlertController,
     private router: Router
   ) {
-    this.huespedes = huespedService.getHuespedes();
+
+    this.huespedService.getReferenceHuespedesArray();
+    this.huespedService.getHuespedes().subscribe(res =>{
+      this.huespedes=res;
+    });
+
   }
 
   public async borrarHuesped(pos: number) {
@@ -35,7 +40,7 @@ export class HomePage {
           text: 'Aceptar',
           role: 'confirm',
           handler: () => {
-            this.huespedes = this.huespedService.borrarHuesped(pos);
+            this.huespedes = this.huespedService.borrarHuesped(this.huespedes[pos].id,pos);
           },
         },
       ],

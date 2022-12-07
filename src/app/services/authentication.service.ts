@@ -7,12 +7,12 @@ import { AlertController } from '@ionic/angular';
 })
 export class AuthenticationService {
   // Login básico
-  public tokens = ['admin','9895257528','1245257528'];
+  public tokens = ['admin'];
   public token = '';
 
   constructor(
     private router: Router,
-    private alertController: AlertController
+    private alertController: AlertController,
   ) {}
 
   validarToken(token: string) {

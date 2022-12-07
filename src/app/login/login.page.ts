@@ -1,3 +1,4 @@
+import { HuespedService } from './../services/huesped.service';
 import { Component, OnInit } from '@angular/core';
 import { AuthenticationService } from '../services/authentication.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -13,8 +14,16 @@ export class LoginPage implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthenticationService
-  ) {}
+    private authService: AuthenticationService,
+    private huespedServices: HuespedService //se usa para cargar los tokens 
+  ) {
+    // this.huespedServices.getHuespedes().subscribe(res =>{
+    //   res.forEach(huesped => {
+    //     this.authService.tokens.push(huesped.token);
+    //   });
+    //   console.log(this.authService.tokens);
+    // });
+  }
 
   async ngOnInit() {
     this.myForm = this.formBuilder.group({

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Huesped } from '../models/huesped';
 import { AuthenticationService } from './authentication.service';
-
+import { AngularFirestore } from '@angular/fire/compat/firestore'
+import { map } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
@@ -11,35 +12,71 @@ export class HuespedService {
   public precioHabitaciones = [2300, 1200, 1500, 3100, 4000, 2500, 1300, 1300, 1300, 2000];
   public claveHabitaciones = [125478, 365214, 364128, 259436, 256478, 125946, 231524, 154758, 456325, 121236];
 
-  constructor(private authService:AuthenticationService) {
-    this.huespedes = [
-      {
-        token: 9895257528 + '',
-        nombre: 'Bradley Addiel González Flores',
-        telefono: '3222131135',
-        fecha_ingreso: '2022-11-20',
-        fecha_salida: '2022-11-24',
-        habitacion: 1,
-        anticipo:600
-      },
-      {
-        token: 1245257528 + '',
-        nombre: 'Pedro Avila',
-        telefono: '3111950830',
-        fecha_ingreso: '2022-11-25',
-        fecha_salida: '2022-11-28',
-        habitacion: 3,
-        anticipo:300
-      },
-    ];
+  constructor(private authService:AuthenticationService, private firestore: AngularFirestore) {
+    // this.huespedes = [
+    //   {
+    //     token: 9895257528 + '',
+    //     nombre: 'Bradley Addiel González Flores',
+    //     telefono: '3222131135',
+    //     fecha_ingreso: '2022-11-20',
+    //     fecha_salida: '2022-11-24',
+    //     habitacion: 1,
+    //     anticipo:600
+    //   },
+    //   {
+    //     token: 1245257528 + '',
+    //     nombre: 'Pedro Avila',
+    //     telefono: '3111950830',
+    //     fecha_ingreso: '2022-11-25',
+    //     fecha_salida: '2022-11-28',
+    //     habitacion: 3,
+    //     anticipo:300
+    //   },
+    // ];
+
+    this.getHuespedes().subscribe(res =>{
+      this.huespedes=res;
+      this.authService.tokens=['admin'];
+      this.huespedes.forEach(huesped => {
+        this.authService.tokens.push(huesped.token);
+      });
+      console.log(this.authService.tokens);
+    });
   }
 
-  public getHuespedes(): Huesped[] {
+  public getReferenceHuespedesArray(){
     return this.huespedes;
+  }
+
+  public getHuespedes() {
+    return this.firestore.collection('Huesped').snapshotChanges().pipe(
+      
+      map(actions => {
+        return actions.map(a => {
+          const data = a.payload.doc.data() as Huesped;
+          const id = a.payload.doc.id;
+          return { id, ...data }; 
+        });
+      })
+    );
   }
 
   public getHabitaciones(): number[] {
     return this.habitaciones;
+  }
+
+  public nuevoHuesped(huesped: Huesped) {
+    // console.log('Huesped antes de insertarse en la base de datos');
+    // console.log(this.huespedes);
+    this.firestore.collection('Huesped').add(huesped).then( () => {
+      console.log('Huesped insertado');
+      console.log(this.huespedes);
+      this.authService.tokens.push(huesped.token);
+      console.log(this.authService.tokens);
+    });
+    // this.huespedes.push(huesped);
+    // this.getHuespedes();
+    // return this.huespedes;
   }
 
   public crearToken(): string {
@@ -54,21 +91,18 @@ export class HuespedService {
     return random;
   }
 
-  public borrarHuesped(index: number): Huesped[] {
+  public borrarHuesped(id: string,index): Huesped[] {
+    this.firestore.collection('Huesped').doc(id).delete();
     this.authService.borrarToken(this.huespedes[index].token);
-    this.huespedes.splice(index, 1);
     return this.huespedes;
   }
 
-  public nuevoHuesped(Huesped: Huesped): Huesped[] {
-    this.huespedes.push(Huesped);
-    this.authService.tokens.push(Huesped.token);
-    // this.getHuespedes();
-    return this.huespedes;
+  public getHuespedTokens(){
+    const tokens = this.huespedes['token'];
+    console.log(tokens);
   }
-
   public getHuespedToken(token: string): Huesped {
-    let item: Huesped;
+    let item: Huesped = new Huesped();
     item = this.huespedes.find((huesped) => {
       return huesped.token === token;
     });
@@ -80,9 +114,7 @@ export class HuespedService {
     }
     return true;
   }
-  public prueba(fecha_evaluar: string){
 
-  }
   public validRoomHuesped(fecha_ingreso: string, habitacion: number): boolean{
     const huespedCuartoRepetido: number[] = [];
     this.huespedes.forEach((huesped,i) => {
